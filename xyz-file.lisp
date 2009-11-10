@@ -31,7 +31,7 @@
   "Creates a _new_ atom from a row parsed from an xyz-file"
   (make-instance '%atom
 		 :name (car row)
-		 :pos (apply #':vecr (cdr row))))
+		 :pos (apply #'vecr (cdr row))))
 
 (defmethod atoms ((xyz xyz-file))
   "This takes a single frame from an xyz file and translates it into a list of the atoms in the frame"
