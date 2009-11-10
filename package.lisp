@@ -1,4 +1,2 @@
 (defpackage #:md
-  (:use #:cl))
-
-(in-package #:md)
+  (:use #:cl #:cl-graph))
