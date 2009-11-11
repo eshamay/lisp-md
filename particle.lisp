@@ -44,14 +44,6 @@
     (Br -1.0)
     (I -1.0)))
 
-(defmacro define-generic-slot-setter (fn-name input)
-  `(defgeneric (setf ,fn-name) (obj ,input)
-     (:documentation "A function to set the slot with the input value")))
-
-(defmacro define-generic-slot-getter (name)
-  `(defgeneric ,name (obj)
-     (:documentation "Returns the value of the slot")))
-
 ;; generate all the generic functions for setting/getting slots
 (define-generic-slot-setter id id)
 (define-generic-slot-setter molecule molecule)
@@ -71,20 +63,12 @@
 (defgeneric rename (obj name)
   (:documentation "Rename an object"))
 
-(defmacro specialized-method-getter (obj-type fn-name slot-name)
-  `(defmethod ,fn-name ((o ,obj-type))
-     (slot-value o ',slot-name)))
-
 (specialized-method-getter particle name name)
 (specialized-method-getter particle id id)
 (specialized-method-getter particle mass mass)
 (specialized-method-getter particle charge charge)
 (specialized-method-getter particle pos pos)
 (specialized-method-getter %atom molecule molecule)
-
-(defmacro specialized-method-setter (obj-type fn-name slot-name)
-  `(defmethod (setf ,fn-name) ((o ,obj-type) input)
-     (setf (slot-value o ',slot-name) input)))
 
 (specialized-method-setter particle mass mass)
 (specialized-method-setter particle id id)

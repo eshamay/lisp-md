@@ -2,9 +2,6 @@
 
 (defclass xyz-file (coordinate-file) ())
 
-(defun clean-string (str)
-  (string-trim '(#\Space #\Tab #\Newline) str))
-
 (defmethod read-header ((xyz xyz-file))
   "The header of an XYZ file is comprised of one line containing the number of atoms in each frame, and a next line with some type of information about the frame (frame number, useful text, etc.). This method sets the number of atoms and then eats up the informational header info."
   (with-slots (file num-atoms) xyz

@@ -4,6 +4,7 @@
   :depends-on (#:cl-graph)
   :serial t
   :components ((:file "package")
+	       (:file "macros")
 	       (:file "vectors")
   	       (:file "particle")
 	       (:file "molecule")
