@@ -34,3 +34,7 @@
   "This takes a single frame from an xyz file and translates it into a list of the atoms in the frame"
   (let ((frame (frame xyz))) ; grab the frame from the coordinate-file
     (map 'list #'xyz-frame-row->%atom frame)))
+
+(defmacro with-xyz-file (filename &rest body)
+  `(with-coordinate-file ,filename 'xyz-file xyz
+			 ,@body))

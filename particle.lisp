@@ -7,42 +7,10 @@
    (mass :accessor mass :initarg :mass :initform 0.0)
    (charge :accessor charge :initarg :charge :initform 0.0)))
 
-(defvar *system-size* nil)
-(defun set-system-size (x y z)
-  "Allows us to set the system size to enable calculations involving periodic boundaries (on orthorhombic systems)"
-  (setf *system-size* (vecr x y z)))
-
 (defclass %atom (particle)
    ((name :initarg :name
 	  :initform (error "(%atom) :: Every atom in the system must have a name!"))
     (molecule :accessor molecule :initarg :molecule :initform nil)))
-
-(defvar *atomic-masses*
-  '((H 1.008) (D 2.014) (T 3.016)
-    (C 12.0108)
-    (N 14.0067)
-    (O 15.9994)
-    (Na 22.9898)
-    (Si 28.0855)
-    (P 30.9738)
-    (Cl 35.453)
-    (K 39.0983)
-    (Ca 40.078)
-    (Br 79.904)
-    (I 126.9045)))
-    
-(defvar *atomic-charges*
-  '((H 1.0) (D 1.0) (T 1.0)
-    (C 4.0)
-    (N 5.0)
-    (O -2.0)
-    (Na 1.0)
-    (Si 4.0)
-    (Cl -1.0)
-    (K 1.0)
-    (Ca 2.0)
-    (Br -1.0)
-    (I -1.0)))
 
 ;; generate all the generic functions for setting/getting slots
 (define-generic-slot-setter id id)
@@ -74,7 +42,7 @@
 (specialized-method-setter particle id id)
 (specialized-method-setter %atom molecule molecule)
 
-(defmethod move ((p particle) position)
+(defmethod move ((p particle) (position vector))
   (if (vecr-p position)
       (setf (slot-value p 'pos) position)
       (error "[particle:move] :: Using a non-vector to specify a new location")))
@@ -102,3 +70,33 @@
 
 (defmethod distance ((a %atom) (b %atom))
   (minimum-distance (pos a) (pos b) *system-size*))
+
+(defmethod atom-list-lookup ((a %atom) (b %atom) alist)
+  "Takes a specialized alist - each car is a list of two atoms, each cdr is the key (i.e. bond-length) and returns the cdr - and returns the value for the pair-list given"
+  (cdr (assoc '((name a) (name b)) alist :test #'equal)))
+	       
+(defmethod h-bonding-lookup ((a %atom) (b %atom))
+  (atom-list-lookup a b *h-bonding-atoms*))
+
+(defmethod bond-length-lookup ((a %atom) (b %atom))
+  (atom-list-lookup a b *bond-lengths*))
+
+
+(defmethod bonded-p ((a %atom) (b %atom))
+  "Returns or false if the two atoms are bound based on the above bond-length criteria"
+  (let ((distance (distance a b))
+	(max-length (try-both-ways 'bond-length-lookup a b)))
+    (if (and
+	 max-length
+	 (< distance max-length))
+	distance
+	nil)))
+
+(defun atom-graph (atoms)
+  "Creates a graph to represent interconnections between atoms in the system given a list of the %atoms"
+  (let ((graph (cl-graph:make-graph 'cl-graph:graph-container :default-edge-class 'cl-graph:weighted-edge)))
+    (loop-on-pairs a b atoms		; check the distance between each pair of atoms in the system
+	 (let ((bond-length (bonded-p a b)))
+	   (if (not (null bond-length))	; only add a graph edge if the two atoms are bound based on the bond-length criteria
+	       (cl-graph:add-edge-between-vertexes graph a b :value bond-length :edge-type :undirected))))
+    graph))

@@ -33,6 +33,24 @@
   "returns a list of the first n elements from the stream"
   (loop repeat n collect (read stream nil nil)))
 
+(defun grab-lists-from-stream (n m stream)
+  "returns n lists, each with m elements parsed from the stream"
+  (loop repeat n collect
+       (grab-n-from-stream m stream)))
+
+(defmacro loop-on-pairs (id1 id2 lst &body body)
+  "loops over all pairs of items in a list using the names specified by the two ids"
+  `(loop for (,id1 . rest) on ,lst do
+	(loop for ,id2 in rest
+	   do ,@body)))
+
+(defun try-both-ways (fn arg1 arg2)
+  "Takes a function and two arguments. If running the function with the arguments in the order as given doesn't work (results nil) then it tries them reversed."
+  (let ((result (funcall fn arg1 arg2)))
+    (if (not (null result))
+	result
+	(funcall fn arg2 arg1))))
+
 (defun list-deep-length (lst)
   (if (null lst)
       0

@@ -91,12 +91,15 @@ FORMAT(12i6)  NATOM,  NTYPES, NBONH,  MBONA,  NTHETH, MTHETA,
   (if (null name-lst)
       nil
       (cons (funcall fn (car name-lst) :id id)
-	    (make-obj-list (cdr name-lst) (+ 1 id) fn))))
+	    (prmtop-make-obj-list (cdr name-lst) (+ 1 id) fn))))
 
 (defun create-prmtop-list (prmtop-file-data prmtop-flag make-obj-fn)
   "Creates a list of obj instances that have their names and id's set from the prmtop-file"
   (let ((names (get-prmtop-data prmtop-flag prmtop-file-data))) ; The list of names for creating the atoms
     (prmtop-make-obj-list names 0 make-obj-fn)))
+
+(defmethod atom-count ((prmtop prmtop-data))
+  (prmtop-data-atom-count prmtop))
 
 (defmacro with-prmtop-file ((var filename) &rest body)
   "A wrapper for letting us work easily with a prmtop file"
